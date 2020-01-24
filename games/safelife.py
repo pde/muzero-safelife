@@ -1,9 +1,13 @@
+import os
 import gym
 import numpy
-from safelife import safelife_env as sle
+import tensorflow as tf
 
+from safelife.safelife.safelife_env import SafeLifeEnv
+from safelife.safelife.safelife_game import CellTypes
+from safelife.safelife.file_finder import SafeLifeLevelIterator
+from safelife.safelife import env_wrappers
 
-sle.SafeLifeEnv.register()
 
 class MuZeroConfig:
     def __init__(self):
@@ -11,7 +15,7 @@ class MuZeroConfig:
 
         ### Game
         self.observation_shape = 4  # Dimensions of the game observation
-        self.action_space = sle.SafeLifeEnv.action_names  # Fixed list of all possible actions
+        self.action_space = SafeLifeEnv.action_names  # Fixed list of all possible actions
 
         ### Self-Play
         self.num_actors = 10  # Number of simultaneous threads self-playing to feed the replay buffer
@@ -69,42 +73,45 @@ class MuZeroConfig:
             return 0.25
 
 
-class Game:
-    """Game wrapper.
-    """
+def Game(seed=None, logdir="./safelife-logs"):
+    if logdir:
+        video_name = os.path.join(logdir, "episode-{episode_num}-{step_num}")
+    else:
+        video_name = None
 
-    def __init__(self, seed=None):
-        self.env = gym.make("safelife-append-still-v1")
-        if seed is not None:
-            self.env.seed(seed)
+    if logdir:
+        fname = os.path.join(logdir, "training.yaml")
+        if os.path.exists(fname):
+            episode_log = open(fname, 'a')
+        else:
+            episode_log = open(fname, 'w')
+            episode_log.write("# Training episodes\n---\n")
+    else:
+        episode_log = None
 
-    def step(self, action):
-        """Apply action to the game.
-        
-        Args:
-            action : action of the action_space to take.
+    tf_logger = tf.summary.FileWriter(logdir)
 
-        Returns:
-            The new observation, the reward and a boolean if the game has ended.
-        """
-        observation, reward, done, _ = self.env.step(action)
-        return numpy.array(observation).flatten(), reward, done
-
-    def reset(self):
-        """Reset the game for a new game.
-        
-        Returns:
-            Initial observation of the game.
-        """
-        return self.env.reset()
-
-    def close(self):
-        """Properly close the game.
-        """
-        self.env.close()
-
-    def render(self):
-        """Display the game observation.
-        """
-        self.env.render()
-        input("Press enter to take a step ")
+    levelgen = SafeLifeLevelIterator('random/append-still-easy.yaml')
+    env = SafeLifeEnv(
+        levelgen,
+        view_shape=(25,25),
+        output_channels=(
+            CellTypes.alive_bit,
+            CellTypes.agent_bit,
+            CellTypes.pushable_bit,
+            CellTypes.destructible_bit,
+            CellTypes.frozen_bit,
+            CellTypes.spawning_bit,
+            CellTypes.exit_bit,
+            CellTypes.color_bit + 0,  # red
+            CellTypes.color_bit + 1,  # green
+            CellTypes.color_bit + 5,  # blue goal
+        ))
+    env.seed(seed)
+    env = env_wrappers.MovementBonusWrapper(env, as_penalty=True)
+    env = env_wrappers.MinPerformanceScheduler(env, min_performance=0.1)
+    env = env_wrappers.RecordingSafeLifeWrapper(
+        env, video_name=video_name, tf_logger=tf_logger,
+        log_file=episode_log)
+    env = env_wrappers.ExtraExitBonus(env)
+    return env
