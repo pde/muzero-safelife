@@ -8,6 +8,7 @@ from safelife.safelife.safelife_game import CellTypes
 from safelife.safelife.file_finder import SafeLifeLevelIterator
 from safelife.safelife import env_wrappers
 
+SafeLifeEnv.register()
 
 class MuZeroConfig:
     def __init__(self):
@@ -18,7 +19,7 @@ class MuZeroConfig:
         self.action_space = SafeLifeEnv.action_names  # Fixed list of all possible actions
 
         ### Self-Play
-        self.num_actors = 10  # Number of simultaneous threads self-playing to feed the replay buffer
+        self.num_actors = 1  # Number of simultaneous threads self-playing to feed the replay buffer
         self.max_moves = 500  # Maximum number of moves if game is not finished before
         self.num_simulations = 50  # Number of futur moves self-simulated
         self.discount = 0.97  # Chronological discount of the reward
