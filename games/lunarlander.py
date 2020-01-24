@@ -14,7 +14,7 @@ class MuZeroConfig:
         ### Self-Play
         self.num_actors = 10  # Number of simultaneous threads self-playing to feed the replay buffer
         self.max_moves = 500  # Maximum number of moves if game is not finished before
-        self.num_simulations = 50  # Number of futur moves self-simulated
+        self.num_simulations = 50  # Number of future moves self-simulated
         self.discount = 0.997  # Chronological discount of the reward
         self.self_play_delay = None # Number of seconds to wait after each played game to adjust the self play / training ratio to avoid overfitting (Recommended is 13:1 see https://arxiv.org/abs/1902.04522 Appendix A)
 

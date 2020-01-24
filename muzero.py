@@ -1,6 +1,9 @@
 import copy
 import importlib
 import os
+import os.path
+import subprocess
+import sys
 import time
 
 import numpy
@@ -166,8 +169,14 @@ class MuZero:
 
 
 if __name__ == "__main__":
-    muzero = MuZero("cartpole")
-    muzero.train()
+    try:
+        muzero = MuZero("safelife")
+        muzero.train()
+    finally:
+        if os.path.exists("/etc/boto.cfg") and "Google" in open("/etc/boto.cfg").read():
+            subprocess.run("sudo shutdown +3".split())
+            print("Shutdown commenced. Exiting to bash.")
+            subprocess.run(["bash", "-il"])
 
-    muzero.load_model()
-    muzero.test()
+    #muzero.load_model()
+    #muzero.test()

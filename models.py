@@ -8,7 +8,7 @@ class FullyConnectedNetwork(torch.nn.Module):
         super(FullyConnectedNetwork, self).__init__()
         layers_sizes.insert(0, input_size)
         layers = []
-        if 1 < len(layers_sizes):
+        if len(layers_sizes) > 1:
             for i in range(len(layers_sizes) - 1):
                 layers.extend(
                     [
