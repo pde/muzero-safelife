@@ -3,9 +3,11 @@ import queue
 import logging
 import textwrap
 import numpy as np
+import tensorflow as tf
 
 from gym import Wrapper
 from gym.wrappers.monitoring import video_recorder
+
 from .side_effects import side_effect_score
 from .safelife_game import CellTypes
 from .render_text import cell_name
@@ -183,6 +185,17 @@ class RecordingSafeLifeWrapper(BaseWrapper):
     video_recording_freq = 100
     record_side_effects = True
     other_episode_data = {}
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if state['tf_logger'] is not None:
+            state['tf_logger'] = state.tf_logger.get_logdir()
+        return state
+
+    def __setstate__(self, state):
+        if state['tf_logger'] is not None:
+            state['tf_logger'] = tf.summary.FileWriter(state['tf_logger'])
+        self.__dict__.update(state)
 
     def log_episode(self):
         if self.global_counter is not None:
