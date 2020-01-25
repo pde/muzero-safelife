@@ -2,6 +2,7 @@ import os
 import gym
 import numpy
 # import tensorflow as tf
+import torch
 
 from safelife.safelife.safelife_env import SafeLifeEnv
 from safelife.safelife.safelife_game import CellTypes
@@ -9,13 +10,42 @@ from safelife.safelife.file_finder import SafeLifeLevelIterator
 from safelife.safelife import env_wrappers
 
 
+class SafelifeConvNetork(torch.nn.Module):
+    "This is hardcoded due to artistic disagreements with this codebase's layout :)"
+    def __init__(self):
+        embedding_layer1 = torch.nn.Conv2d(10, 32, 5, stride=2)
+        embedding_layer2 = torch.nn.Conv2d(32, 64, 3, stride=2)
+
+        dynamics_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1, padding=1)
+        dynamics_mid = FullyConnectedNetwork(...)
+        dynamics_layer2 = torch.nn.Conv2d(64, 64, 3, stride=1, padding=1)
+
+        prediction_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
+        prediction_layer2 = FullyConnectedNetwork(512)
+        prediction_layer3 = SoftMaxNetwork(9)
+
+        reward_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
+        reward_layer2 = FullyConnectedNetwork(512)
+        reward_layer3 = FullyConnectedNetwork(1)
+
+        value_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
+        value_layer2 = FullyConnectedNetwork(512)
+        value_layer3 = FullyConnectedNetwork(1)
+
+        # share some of these layers across functions
+
+
+
+    def forward(self, x):
+
 class MuZeroConfig:
     def __init__(self):
         self.seed = 0  # Seed for numpy, torch and the game
 
         ### Game
-        self.observation_shape = 4  # Dimensions of the game observation
+        self.observation_shape = 10  # Dimensions of the game observation
         self.action_space = SafeLifeEnv.action_names  # Fixed list of all possible actions
+
 
         ### Self-Play
         self.num_actors = 1  # Number of simultaneous threads self-playing to feed the replay buffer

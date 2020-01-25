@@ -3,7 +3,7 @@ import torch
 
 class FullyConnectedNetwork(torch.nn.Module):
     def __init__(
-        self, input_size, layers_sizes, output_size, activation=torch.nn.Tanh()
+        self, input_size, layers_sizes, output_size, activation=torch.nn.Tanh(), conv_layers=0
     ):
         super(FullyConnectedNetwork, self).__init__()
         layers_sizes.insert(0, input_size)
@@ -25,6 +25,13 @@ class FullyConnectedNetwork(torch.nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+class SafelifeConvNetork(torch.nn.Module):
+    "This is hardcoded due to artistic disagreements with this codebase's layout :)"
+    def __init__(self):
+        layer1 = torch.nn.Conv2D
+
+    def forward(self, x):
 
 
 # TODO: unified residual network
