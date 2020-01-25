@@ -111,8 +111,8 @@ def Game(seed=None, logdir="./safelife-logs"):
     env.seed(seed)
     env = env_wrappers.MovementBonusWrapper(env, as_penalty=True)
     env = env_wrappers.MinPerformanceScheduler(env, min_performance=0.1)
-    env = env_wrappers.RecordingSafeLifeWrapper(
-        env, video_name=video_name, tf_logger=tf_logger,
-        log_file=episode_log)
+    #env = env_wrappers.RecordingSafeLifeWrapper(
+    #    env, video_name=video_name, tf_logger=tf_logger,
+    #    log_file=episode_log)
     env = env_wrappers.ExtraExitBonus(env)
     return env
