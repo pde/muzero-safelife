@@ -1,14 +1,13 @@
 import os
 import gym
 import numpy
-import tensorflow as tf
+# import tensorflow as tf
 
 from safelife.safelife.safelife_env import SafeLifeEnv
 from safelife.safelife.safelife_game import CellTypes
 from safelife.safelife.file_finder import SafeLifeLevelIterator
 from safelife.safelife import env_wrappers
 
-SafeLifeEnv.register()
 
 class MuZeroConfig:
     def __init__(self):
@@ -75,6 +74,7 @@ class MuZeroConfig:
 
 
 def Game(seed=None, logdir="./safelife-logs"):
+    """
     if logdir:
         video_name = os.path.join(logdir, "episode-{episode_num}-{step_num}")
     else:
@@ -91,6 +91,7 @@ def Game(seed=None, logdir="./safelife-logs"):
         episode_log = None
 
     tf_logger = tf.summary.FileWriter(logdir)
+    """
 
     levelgen = SafeLifeLevelIterator('random/append-still-easy.yaml')
     env = SafeLifeEnv(
