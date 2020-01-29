@@ -13,34 +13,32 @@ from safelife.safelife import env_wrappers
 class SafelifeConvNetork(torch.nn.Module):
     "This is hardcoded due to artistic disagreements with this codebase's layout :)"
     def __init__(self, conf):
-        embedding = [torch.nn.Conv2d(10, 32, 5, stride=2), torch.nn.ReLU(),
-                     torch.nn.Conv2d(32, 64, 3, stride=2), torch.nn.ReLU()]
 
-        dynamics = [torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU(),
-                    torch.nn.Linear(conf.hidden_size)              , torch.nn.ReLU(),
-                    torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU()]
+        m = lambda l: torch.nn.ModuleList(l)
 
-        dynamics_reward = dynamics + [torch.nn,
+        self.embedding = m([torch.nn.Conv2d(10, 32, 5, stride=2), torch.nn.ReLU(),
+                            torch.nn.Conv2d(32, 64, 3, stride=2), torch.nn.ReLU()])
+
+        self.dynamics = ([torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU(),
+                          torch.nn.Linear(conf.hidden_size)              , torch.nn.ReLU(),
+                          torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU()]
+
+        self.dynamics_reward = m(dynamics + [torch.nn.Linear(conf.hidden_size), torch.nn.ReLU(),
+                                             torch.nn.Linear(conf.hidden_size, 1)])
+
+        self.dynamics = m(self.dynamics)
 
         # todo: figure out how much layer reuse we really want here
-        policy_value = [torch.nn.Conv2d(64, 64, 3, stride=1), torch.nn.ReLU(),
-                       torch.nn.Linear(conf.hidden_size)    , torch.nn.ReLU(),
-                       torch.nn.Linear(1)]
+        self.policy_value = [torch.nn.Conv2d(64, 64, 3, stride=1), torch.nn.ReLU(),
+                             torch.nn.Linear(conf.hidden_size)   , torch.nn.ReLU(),
+                             torch.nn.Linear(conf.hidden_size, 1)]
 
-        policy_action = policy_value[0:4] + [
-                            #torch.nn.Linear(conf.hidden_size), torch.nn.ReLU(),
-                            torch.nn.Softmax(len(conf.action_space))
-                        ]
+        self.policy = policy_value[0:4] + [
+            # torch.nn.Linear(conf.hidden_size), torch.nn.ReLU(),
+            torch.nn.Softmax(len(conf.action_space))
+        ]
 
-        prediction_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
-        prediction_layer2 = FullyConnectedNetwork(512)
-        prediction_layer3 = torch.nn.Linear(9)
-
-        reward_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
-        reward_layer2 = FullyConnectedNetwork(512)
-        reward_layer3 = FullyConnectedNetwork(1)
-
-        # share some of these layers across functions
+        self.policy_value = m(self.policy_value)
 
 
     def forward(self, x):
