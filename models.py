@@ -26,13 +26,6 @@ class FullyConnectedNetwork(torch.nn.Module):
             x = layer(x)
         return x
 
-class SafelifeConvNetork(torch.nn.Module):
-    "This is hardcoded due to artistic disagreements with this codebase's layout :)"
-    def __init__(self):
-        layer1 = torch.nn.Conv2D
-
-    def forward(self, x):
-
 
 # TODO: unified residual network
 class MuZeroNetwork(torch.nn.Module):

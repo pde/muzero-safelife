@@ -12,31 +12,39 @@ from safelife.safelife import env_wrappers
 
 class SafelifeConvNetork(torch.nn.Module):
     "This is hardcoded due to artistic disagreements with this codebase's layout :)"
-    def __init__(self):
-        embedding_layer1 = torch.nn.Conv2d(10, 32, 5, stride=2)
-        embedding_layer2 = torch.nn.Conv2d(32, 64, 3, stride=2)
+    def __init__(self, conf):
+        embedding = [torch.nn.Conv2d(10, 32, 5, stride=2), torch.nn.ReLU(),
+                     torch.nn.Conv2d(32, 64, 3, stride=2), torch.nn.ReLU()]
 
-        dynamics_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1, padding=1)
-        dynamics_mid = FullyConnectedNetwork(...)
-        dynamics_layer2 = torch.nn.Conv2d(64, 64, 3, stride=1, padding=1)
+        dynamics = [torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU(),
+                    torch.nn.Linear(conf.hidden_size)              , torch.nn.ReLU(),
+                    torch.nn.Conv2d(64, 64, 3, stride=1, padding=1), torch.nn.ReLU()]
+
+        dynamics_reward = dynamics + [torch.nn,
+
+        # todo: figure out how much layer reuse we really want here
+        policy_value = [torch.nn.Conv2d(64, 64, 3, stride=1), torch.nn.ReLU(),
+                       torch.nn.Linear(conf.hidden_size)    , torch.nn.ReLU(),
+                       torch.nn.Linear(1)]
+
+        policy_action = policy_value[0:4] + [
+                            #torch.nn.Linear(conf.hidden_size), torch.nn.ReLU(),
+                            torch.nn.Softmax(len(conf.action_space))
+                        ]
 
         prediction_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
         prediction_layer2 = FullyConnectedNetwork(512)
-        prediction_layer3 = SoftMaxNetwork(9)
+        prediction_layer3 = torch.nn.Linear(9)
 
         reward_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
         reward_layer2 = FullyConnectedNetwork(512)
         reward_layer3 = FullyConnectedNetwork(1)
 
-        value_layer1 = torch.nn.Conv2d(64, 64, 3, stride=1)
-        value_layer2 = FullyConnectedNetwork(512)
-        value_layer3 = FullyConnectedNetwork(1)
-
         # share some of these layers across functions
 
 
-
     def forward(self, x):
+        pass
 
 class MuZeroConfig:
     def __init__(self):
@@ -64,7 +72,7 @@ class MuZeroConfig:
 
         ### Network
         self.encoding_size = 64
-        self.hidden_size = 32
+        self.hidden_size = 512
 
         # Training
         self.results_path = "./pretrained"  # Path to store the model weights
